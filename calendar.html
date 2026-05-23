@@ -3,108 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ปฏิทินการจองห้องประชุม Zoom</title>
+    <title>หน้าหลัก - ระบบจองห้องประชุม Zoom</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Sarabun', sans-serif; }
+        /* ซ่อน Scrollbar ของเมนูในมือถือ แต่ยังเลื่อนได้ */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* -------------------------------------------
-           ปรับแต่งปฏิทินให้เข้ากับธีมสีขาวและจัดระยะห่าง
-        ---------------------------------------------- */
-        .fc { font-family: 'Sarabun', sans-serif; color: #374151; }
-        .fc-event { cursor: pointer; border-radius: 6px; padding: 4px 8px; border: none; font-weight: 600; font-size: 0.85em; }
-        
-        /* ขนาดตัวอักษรของหัวข้อเดือน */
-        .fc-toolbar-title { font-size: 1.5rem !important; font-weight: 700 !important; color: #1f2937; margin: 0 1rem !important; }
-        
-        /* จัดการ Layout ของ Toolbar ด้านบน */
-        .fc-header-toolbar { 
-            flex-wrap: wrap; 
-            gap: 1.5rem; 
-            margin-bottom: 2rem !important; 
-        }
-        
-        /* จัดกลุ่มปุ่มแต่ละโซน (ซ้าย กลาง ขวา) */
-        .fc-toolbar-chunk { 
-            display: flex; 
-            align-items: center; 
-            gap: 0.75rem; /* ระยะห่างระหว่างกลุ่มปุ่ม */
-            flex-wrap: wrap;
-        }
-        
-        /* แยกปุ่มที่ติดกันให้มีระยะห่าง */
-        .fc-button-group { 
-            display: flex; 
-            gap: 0.5rem; /* ระยะห่างระหว่างปุ่มภายในกลุ่มเดียวกัน */
-        }
-        
-        /* ปรับแต่งดีไซน์ปุ่ม (ความโค้ง, เงา, ระยะขอบ) */
-        .fc-button { 
-            padding: 0.5rem 1.25rem !important; 
-            font-weight: 600 !important;
-            font-family: 'Sarabun', sans-serif !important;
-            border-radius: 10px !important; /* แยกความโค้งมนให้เป็นอิสระต่อกัน */
-            transition: all 0.2s ease !important;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-            text-transform: capitalize;
-        }
-        
-        /* สีปุ่มปกติ (พื้นขาว ขอบเทาอ่อน) */
-        .fc-button-primary { 
-            background-color: #ffffff !important; 
-            border: 1px solid #e5e7eb !important; 
-            color: #4b5563 !important; 
-        }
-        
-        /* สีปุ่มเมื่อนำเมาส์ไปชี้ */
-        .fc-button-primary:hover { 
-            background-color: #f8fafc !important; 
-            color: #2563eb !important; 
-            border-color: #bfdbfe !important;
-        }
-        
-        /* สีปุ่มเมื่อกำลังเลือกอยู่ (Active มุมมองปัจจุบัน) */
-        .fc-button-active { 
-            background-color: #eff6ff !important; 
-            color: #1d4ed8 !important; 
-            border-color: #93c5fd !important;
-            box-shadow: 0 1px 3px 0 rgba(37, 99, 235, 0.1) !important;
-        }
-
-        /* ปุ่มที่ไม่สามารถกดได้ (Disabled) */
-        .fc-button-primary:disabled {
-            background-color: #f9fafb !important;
-            color: #9ca3af !important;
-            border-color: #f3f4f6 !important;
-            cursor: not-allowed;
-            box-shadow: none !important;
-        }
-        
-        /* ส่วนกรอบและสีพื้นหลังของตารางปฏิทิน */
-        .fc-theme-standard td, .fc-theme-standard th { border-color: #e5e7eb; }
-        .fc-col-header-cell { padding: 12px 0; background-color: #f8fafc; border-bottom: 2px solid #e2e8f0 !important; }
-        .fc-day-today { background-color: #eff6ff !important; } /* ไฮไลต์ช่องของวันนี้ */
     </style>
 </head>
-<body class="bg-white min-h-screen flex flex-col">
-
+<body class="bg-white min-h-screen hidden flex-col" id="mainBody">
+    
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                
                 <div class="flex items-center gap-4">
                     <img src="https://hqloiijnyefhikmkmumk.supabase.co/storage/v1/object/sign/LOGO/logo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iNmRlZTI0YS0wZWFhLTRkMTItYTMwNy01NDQ4NGFlNjM3YzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJMT0dPL2xvZ28ucG5nIiwiaWF0IjoxNzc5NDQxNTg5LCJleHAiOjE3ODAzMDU1ODl9.NiHKN2gdafcjONfM0woI38nqRBK0jUojtbvcSjDno1M" alt="College Logo" class="h-10 w-auto object-contain">
                     <span class="text-gray-300 text-xl font-light">|</span>
                     <img src="https://hqloiijnyefhikmkmumk.supabase.co/storage/v1/object/sign/LOGO/Zoom-Logo.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iNmRlZTI0YS0wZWFhLTRkMTItYTMwNy01NDQ4NGFlNjM3YzciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJMT0dPL1pvb20tTG9nby5qcGciLCJpYXQiOjE3Nzk0NDE2NDAsImV4cCI6MTc4MDMwNTY0MH0.gkfJcP_dMDj9QGKyKeBT5MW4ocV0mUBAuM-biUwafcE" alt="Zoom Logo" class="h-6 w-auto object-contain mt-1">
                 </div>
+
                 <div class="flex items-center w-full sm:w-auto overflow-x-auto no-scrollbar pb-1 sm:pb-0">
                     <nav class="flex space-x-2 mr-4">
-                        <a href="index.html" class="text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition">
+                        <a href="index.html" class="bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm font-bold whitespace-nowrap">
                             <i class="fas fa-home mr-1"></i> หน้าหลัก
                         </a>
                         <a href="booking.html" class="text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition">
@@ -113,102 +38,87 @@
                         <a href="booking-list.html" class="text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition">
                             <i class="fas fa-list-alt mr-1"></i> รายการจอง
                         </a>
-                        <a href="calendar.html" class="bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition">
+                        <a href="calendar.html" class="text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition">
                             <i class="fas fa-calendar-alt mr-1"></i> ปฏิทิน
                         </a>
                     </nav>
+                    <button id="logoutBtn" class="text-red-500 hover:text-red-700 bg-white border border-gray-200 hover:bg-gray-50 px-3 py-1.5 rounded-lg text-sm font-bold transition flex items-center whitespace-nowrap ml-auto">
+                        <i class="fas fa-sign-out-alt sm:mr-1"></i> <span class="hidden sm:inline">ออก</span>
+                    </button>
                 </div>
+
             </div>
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto py-8 px-4">
-        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b border-gray-100 pb-4">ปฏิทินคิวห้องประชุม</h2>
+    <main class="flex-1 p-4 md:p-8">
+        <div class="max-w-5xl mx-auto">
             
-            <div id="calendar" class="min-h-[600px]"></div>
+            <div class="mb-10 text-center sm:text-left">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">ยินดีต้อนรับเข้าสู่ระบบจัดการห้องประชุม</h2>
+                <p class="text-gray-600">ผู้ใช้งาน: <span id="userEmail" class="font-bold text-blue-600">กำลังโหลดข้อมูล...</span></p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="booking.html" class="flex flex-col items-center justify-center p-8 bg-white border border-gray-200 shadow-sm rounded-2xl hover:border-blue-500 hover:shadow-md group transition-all duration-300">
+                    <div class="bg-blue-50 p-5 rounded-full mb-4 group-hover:bg-blue-600 transition">
+                        <i class="fas fa-video text-3xl text-blue-600 group-hover:text-white"></i>
+                    </div>
+                    <span class="font-bold text-lg text-gray-800 group-hover:text-blue-600">จองห้องประชุม Zoom</span>
+                    <span class="text-sm text-gray-500 mt-2 text-center">สร้างห้องประชุมใหม่ทันที</span>
+                </a>
+
+                <a href="calendar.html" class="flex flex-col items-center justify-center p-8 bg-white border border-gray-200 shadow-sm rounded-2xl hover:border-blue-500 hover:shadow-md group transition-all duration-300">
+                    <div class="bg-gray-50 p-5 rounded-full mb-4 group-hover:bg-blue-600 transition">
+                        <i class="fas fa-calendar-alt text-3xl text-gray-600 group-hover:text-white"></i>
+                    </div>
+                    <span class="font-bold text-lg text-gray-800 group-hover:text-blue-600">ปฏิทินการจอง</span>
+                    <span class="text-sm text-gray-500 mt-2 text-center">ตรวจสอบคิวห้องประชุม</span>
+                </a>
+
+                <a href="booking-list.html" class="flex flex-col items-center justify-center p-8 bg-white border border-gray-200 shadow-sm rounded-2xl hover:border-blue-500 hover:shadow-md group transition-all duration-300">
+                    <div class="bg-gray-50 p-5 rounded-full mb-4 group-hover:bg-blue-600 transition">
+                        <i class="fas fa-list text-3xl text-gray-600 group-hover:text-white"></i>
+                    </div>
+                    <span class="font-bold text-lg text-gray-800 group-hover:text-blue-600">รายการจองของคุณ</span>
+                    <span class="text-sm text-gray-500 mt-2 text-center">จัดการและตรวจสอบสถานะ</span>
+                </a>
+            </div>
+
         </div>
     </main>
 
     <footer class="py-8 border-t border-gray-200 text-center mt-auto">
-        <p class="font-bold text-blue-700 text-lg">ระบบจองห้องประชุมออนไลน์ Zoom &copy; 2026</p>
-        <p class="text-gray-500 text-sm mt-1">งานเทคโนโลยีสารสนเทศ วิทยาลัยชุมชนสมุทรสาคร</p>
+    <p class="font-bold text-blue-700 text-lg">ระบบจองห้องประชุมออนไลน์ Zoom &copy; 2026</p>
+    <p class="text-gray-500 text-sm mt-1">งานเทคโนโลยีสารสนเทศ วิทยาลัยชุมชนสมุทรสาคร</p>
     </footer>
 
     <script>
         const SUPABASE_URL = 'https://hqloiijnyefhikmkmumk.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxbG9paWpueWVmaGlrbWttdW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNDU5ODMsImV4cCI6MjA5NDkyMTk4M30.jgpU-av5u3VMYx5El6tgKej8NuunB9zsb0Vdb93j_Qw';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        document.addEventListener('DOMContentLoaded', async function() {
+        async function checkUser() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
                 window.location.href = 'login.html';
-                return;
+            } else {
+                document.getElementById('mainBody').classList.remove('hidden');
+                document.getElementById('mainBody').classList.add('flex');
+                
+                const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', session.user.id).single();
+                const displayName = profile?.full_name || session.user.email;
+                document.getElementById('userEmail').innerText = displayName;
             }
+        }
+        checkUser();
 
-            const calendarEl = document.getElementById('calendar');
-            
-            const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'th', 
-                height: 'auto',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                buttonText: {
-                    today: 'วันนี้',
-                    month: 'เดือน',
-                    week: 'สัปดาห์',
-                    day: 'วัน'
-                },
-                events: [], 
-                eventClick: function(info) {
-                    const props = info.event.extendedProps;
-                    const startTime = info.event.start.toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
-                    const endTime = info.event.end ? info.event.end.toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}) : 'ไม่ระบุ';
-                    
-                    alert(`📌 หัวข้อ: ${info.event.title}\n⏰ เวลา: ${startTime} - ${endTime} น.\n👤 ผู้จอง: ${props.booker_name}`);
-                }
-            });
-            
-            calendar.render();
-
-            async function loadCalendarEvents() {
-                try {
-                    const { data, error } = await supabaseClient.from('zoom_bookings').select('*, profiles(full_name)');
-                    if (error) throw error;
-                    if (!data || data.length === 0) return;
-
-                    const events = data.map(booking => {
-                        if (!booking.start_time || !booking.end_time || !booking.meeting_date) return null;
-                        const startISO = `${booking.meeting_date}T${booking.start_time.substring(0, 5)}:00`;
-                        const endISO = `${booking.meeting_date}T${booking.end_time.substring(0, 5)}:00`;
-
-                        return {
-                            id: booking.id,
-                            title: booking.topic,
-                            start: startISO,
-                            end: endISO,
-                            backgroundColor: '#2563eb', 
-                            borderColor: '#2563eb',
-                            textColor: '#ffffff',
-                            extendedProps: {
-                                booker_name: booking.profiles?.full_name || 'ไม่ทราบชื่อ'
-                            }
-                        };
-                    }).filter(event => event !== null); 
-
-                    calendar.removeAllEvents();
-                    calendar.addEventSource(events);
-                } catch (err) {
-                    console.error('เกิดข้อผิดพลาด:', err.message);
-                }
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            const isConfirm = confirm('คุณต้องการออกจากระบบใช่หรือไม่?');
+            if (isConfirm) {
+                const { error } = await supabaseClient.auth.signOut();
+                if (!error) window.location.href = 'login.html';
             }
-
-            loadCalendarEvents();
         });
     </script>
 </body>
