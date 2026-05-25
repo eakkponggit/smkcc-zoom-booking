@@ -51,6 +51,14 @@
                         class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
                     เข้าสู่ระบบ
                 </button>
+
+                <div class="text-center pt-2">
+                    <a href="https://hqloiijnyefhikmkmumk.supabase.co/storage/v1/object/public/User%20manual/user%20manual.pdf" 
+                       target="_blank" 
+                       class="inline-flex items-center text-sm font-bold text-blue-600 hover:text-blue-800 hover:underline transition gap-2">
+                        <i class="fas fa-book"></i> คู่มือการใช้งานระบบ (PDF)
+                    </a>
+                </div>
             </form>
         </div>
     </main>
@@ -63,7 +71,8 @@
     <script>
         const SUPABASE_URL = 'https://hqloiijnyefhikmkmumk.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxbG9paWpueWVmaGlrbWttdW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNDU5ODMsImV4cCI6MjA5NDkyMTk4M30.jgpU-av5u3VMYx5El6tgKej8NuunB9zsb0Vdb93j_Qw';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // ปรับเป็น window.supabase เพื่อให้เป็นมาตรฐานเดียวกัน
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function checkSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
